@@ -7,4 +7,5 @@ newspaper3k
 googlesearch-python
 dateparser
 google-generativeai
+openpyxl
 lxml[html_clean]
