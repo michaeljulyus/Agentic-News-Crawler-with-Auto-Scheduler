@@ -1,0 +1,9 @@
+streamlit
+pandas
+requests
+urllib3
+beautifulsoup4
+newspaper3k
+googlesearch-python
+dateparser
+google-generativeai
