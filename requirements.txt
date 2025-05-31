@@ -7,3 +7,4 @@ newspaper3k
 googlesearch-python
 dateparser
 google-generativeai
+lxml[html_clean]
