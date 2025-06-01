@@ -152,8 +152,6 @@ if "last_check_time" not in st.session_state:
     st.session_state.last_check_time = datetime.now()
 if "results_df" not in st.session_state:
     st.session_state.results_df = None
-if "download_triggered" not in st.session_state:
-    st.session_state.download_triggered = False
 
 # --- Keyword Manager UI ---
 st.subheader("📌 Keyword Manager")
@@ -200,7 +198,7 @@ now = datetime.now()
 interval = timedelta(hours=st.session_state.interval_hours)
 
 # Scheduled Crawling Logic
-if st.session_state.is_crawling and not st.session_state.download_triggered:
+if st.session_state.is_crawling:
     st.session_state.last_run = now
     st.info("✅ Time to crawl based on schedule... Running crawler...")
 
@@ -279,8 +277,7 @@ if st.session_state.is_crawling and not st.session_state.download_triggered:
         excel_filename = f"news_results_cumulative.xlsx"
         st.session_state.results_df.to_excel(excel_filename, index=False)
         with open(excel_filename, "rb") as f:
-            st.session_state.download_triggered = True
-            st.download_button("📥 Download All Results as Excel", f, file_name=excel_filename)
+            st.download_button("📥 Download All Results as Excel", f, file_name=excel_filename, on_click="ignore")
             
         # Generate response
         with st.spinner("🔍 Menganalisis artikel..."):
@@ -306,8 +303,7 @@ if st.session_state.is_crawling and not st.session_state.download_triggered:
                 f.write(gemini_response)
 
             with open("summary_insight.txt", "rb") as f:
-                st.session_state.download_triggered = True
-                st.download_button("📄 Download Ringkasan & Insight", f, file_name="summary_insight.txt")
+                st.download_button("📄 Download Ringkasan & Insight", f, file_name="summary_insight.txt", on_click="ignore")
             
     # ✅ Update last_run time
     st.session_state.last_run = now
@@ -324,12 +320,5 @@ if st.session_state.is_crawling and not st.session_state.download_triggered:
 
     st.rerun()
 
-elif st.session_state.is_crawling and st.session_state.download_triggered:
-    st.session_state.download_triggered = False
-    sleep_duration = (next_run - datetime.now()).total_seconds()
-    if sleep_duration > 0:
-        time.sleep(sleep_duration)
-
-    st.rerun()
 else:
     st.info("🛑 Crawler is inactive. Press ▶️ to start.")
