@@ -236,6 +236,12 @@ if st.session_state.is_crawling:
     next_run = now + interval
     st.info(f"🕒 Run completed at: {now.strftime('%Y-%m-%d %H:%M:%S')}")
     st.info(f"⏭️ Next scheduled run: {next_run.strftime('%Y-%m-%d %H:%M:%S')}")
+    
+    # ✅ Sleep until next run
+    sleep_duration = (next_run - datetime.now()).total_seconds()
+    if sleep_duration > 0:
+        time.sleep(sleep_duration)
+        
     st.rerun()
 
 # --- Results Section ---
