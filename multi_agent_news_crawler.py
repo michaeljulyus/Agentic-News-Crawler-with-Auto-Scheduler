@@ -140,6 +140,8 @@ if "last_run" not in st.session_state:
     st.session_state.last_run = None
 if "last_check_time" not in st.session_state:
     st.session_state.last_check_time = datetime.now()
+if "results_df" not in st.session_state:
+    st.session_state.results_df = None
 
 st.title("🕵️ Agentic News Crawler with Auto-Scheduler")
 
