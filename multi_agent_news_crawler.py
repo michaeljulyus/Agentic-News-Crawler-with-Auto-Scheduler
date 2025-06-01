@@ -32,14 +32,16 @@ CONTENT:
 TASKS:
 1. Summarize the article in Bahasa Indonesia (50–100 words).
 2. Classify the news into one of these categories: Fraud, Politics, Corruption, Oil and Gas, Economy, Environment, Public Policy, Government, Corporate, Criminal, Energy, Technology.
-3. Determine the sentiment of the article: Positive, Negative, or Neutral.
-4. Recommend a short counterstrategy or action plan in Bahasa Indonesia if the content is related to corporate or public policy risk.
+3. Determine the **main location** or area where the event occurred (if applicable).
+4. Determine the sentiment of the article: Positive, Negative, or Neutral.
+5. Recommend a short counterstrategy or action plan or strategic recommendation in Bahasa Indonesia.
 
 Respond in the following JSON format:
 
 {{
   "summary": "...",
   "category": "...",
+  "location": "...",
   "sentiment": "...",
   "recommendation": "..."
 }}
@@ -234,6 +236,7 @@ if st.session_state.is_crawling:
                 "title": title,
                 "url": url,
                 "publish_date": publish_date_str,
+                "location": gemini_output.get("location", None),
                 "summary": gemini_output.get("summary", None),
                 "category": gemini_output.get("category", None),
                 "sentiment": gemini_output.get("sentiment", None),
@@ -272,6 +275,7 @@ if st.session_state.is_crawling:
                 f"Keyword: {row['keyword']}\n"
                 f"Judul: {row['title']}\n"
                 f"Tanggal: {row['publish_date']}\n"
+                f"Lokasi: {row['location']}\n"
                 f"Kategori: {row['category']}\n"
                 f"Sentimen: {row['sentiment']}\n"
                 f"Ringkasan: {row['summary']}\n"
