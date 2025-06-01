@@ -194,7 +194,7 @@ if not st.session_state.is_crawling:
 else:
     st.button("⏹️ Stop Crawler", on_click=stop_crawl)
 
-now = datetime.now()
+now = datetime.utcnow() + timedelta(hours=7)
 interval = timedelta(hours=st.session_state.interval_hours)
 
 # Scheduled Crawling Logic
@@ -208,14 +208,14 @@ if st.session_state.is_crawling:
     for keyword in st.session_state.keywords:
         with st.spinner(f"🔍 Crawling for keyword: {keyword}"):
             try:
-                urls = list(search(f"{keyword} {datetime.now().strftime('%Y-%m-%d')}", sleep_interval=5, num_results=100, lang="id", unique=True))
+                urls = list(search(f"{keyword} {now.strftime('%Y-%m-%d')}", sleep_interval=5, num_results=100, lang="id", unique=True))
                 for url in urls:
                     if not is_valid_url(url):
                         continue
                     publish_time = extract_publish_datetime_generic(url)
                     if publish_time:
                         publish_time = publish_time.replace(tzinfo=None)
-                        if publish_time > datetime.now() - interval:
+                        if publish_time > now - interval:
                             filtered_urls.append((keyword, url, publish_time))
             except Exception as e:
                 st.warning(f"⚠️ Failed to search for keyword '{keyword}': {e}")
@@ -310,11 +310,11 @@ if st.session_state.is_crawling:
 
     # ✅ Compute and show run times
     next_run = st.session_state.last_run + interval
-    st.info(f"🕒 This run completed at: {now.strftime('%Y-%m-%d %H:%M:%S')}")
+    st.info(f"🕒 Last run: {now.strftime('%Y-%m-%d %H:%M:%S')}")
     st.info(f"⏭️ Next scheduled run: {next_run.strftime('%Y-%m-%d %H:%M:%S')}")
     
     # ✅ Sleep until next run
-    sleep_duration = (next_run - datetime.now()).total_seconds()
+    sleep_duration = (next_run - datetime.utcnow() + timedelta(hours=7)).total_seconds()
     if sleep_duration > 0:
         time.sleep(sleep_duration)
 
