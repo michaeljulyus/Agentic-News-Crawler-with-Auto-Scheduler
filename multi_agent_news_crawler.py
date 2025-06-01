@@ -1,7 +1,9 @@
 import streamlit as st
+import google.generativeai as genai
 import pandas as pd
 import requests
 import urllib3
+import dateparser
 import json
 import re
 import time
@@ -10,8 +12,7 @@ from bs4 import BeautifulSoup
 from newspaper import Article
 from googlesearch import search
 from datetime import datetime, timedelta
-import dateparser
-import google.generativeai as genai
+from zoneinfo import ZoneInfo
 
 # Disable SSL warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -149,7 +150,7 @@ if "interval_hours" not in st.session_state:
 if "last_run" not in st.session_state:
     st.session_state.last_run = None
 if "last_check_time" not in st.session_state:
-    st.session_state.last_check_time = datetime.now()
+    st.session_state.last_check_time = datetime.now(ZoneInfo("Asia/Jakarta"))
 if "results_df" not in st.session_state:
     st.session_state.results_df = None
 
@@ -194,7 +195,9 @@ if not st.session_state.is_crawling:
 else:
     st.button("⏹️ Stop Crawler", on_click=stop_crawl)
 
-now = datetime.now()
+
+# Get current time in Asia/Jakarta
+now = datetime.now(ZoneInfo("Asia/Jakarta"))
 interval = timedelta(hours=st.session_state.interval_hours)
 
 # Scheduled Crawling Logic
@@ -208,14 +211,14 @@ if st.session_state.is_crawling:
     for keyword in st.session_state.keywords:
         with st.spinner(f"🔍 Crawling for keyword: {keyword}"):
             try:
-                urls = list(search(f"{keyword} {datetime.now().strftime('%Y-%m-%d')}", sleep_interval=5, num_results=100, lang="id", unique=True))
+                urls = list(search(f"{keyword} {now.strftime('%Y-%m-%d')}", sleep_interval=5, num_results=100, lang="id", unique=True))
                 for url in urls:
                     if not is_valid_url(url):
                         continue
                     publish_time = extract_publish_datetime_generic(url)
                     if publish_time:
                         publish_time = publish_time.replace(tzinfo=None)
-                        if publish_time > datetime.now() - interval:
+                        if publish_time > now - interval:
                             filtered_urls.append((keyword, url, publish_time))
             except Exception as e:
                 st.warning(f"⚠️ Failed to search for keyword '{keyword}': {e}")
@@ -314,7 +317,7 @@ if st.session_state.is_crawling:
     st.info(f"⏭️ Next scheduled run: {next_run.strftime('%Y-%m-%d %H:%M:%S')}")
     
     # ✅ Sleep until next run
-    sleep_duration = (next_run - datetime.now()).total_seconds()
+    sleep_duration = (next_run - datetime.now(ZoneInfo("Asia/Jakarta"))).total_seconds()
     if sleep_duration > 0:
         time.sleep(sleep_duration)
 
