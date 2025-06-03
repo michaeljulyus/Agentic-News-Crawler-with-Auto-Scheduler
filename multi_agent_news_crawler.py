@@ -42,9 +42,10 @@ CONTENT:
 TASKS:
 1. Summarize the article in Bahasa Indonesia (50–100 words).
 2. Classify the news into one of these categories: Fraud, Politics, Corruption, Oil and Gas, Economy, Environment, Public Policy, Government, Corporate, Criminal, Energy, Technology.
-3. Extract the name of the city where the main event in the article occurred (if mentioned).
+3. Extract the name of the city where the main event in the article occurred. If the city is not mentioned, return "None".
 4. Determine the sentiment of the article: Positive, Negative, or Neutral.
 5. Recommend a short counterstrategy or action plan or strategic recommendation in Bahasa Indonesia.
+6. Provide a confidence score (0 to 1) indicating the likelihood that this article is influenced by spam, buzzer activity, or coordinated manipulation. If no signs are detected, return a low score (e.g., 0.0).
 
 Respond in the following JSON format:
 
@@ -53,11 +54,12 @@ Respond in the following JSON format:
   "category": "...",
   "location": "...",
   "sentiment": "...",
-  "recommendation": "..."
+  "recommendation": "...",
+  "buzzer_influence_score": "..."
 }}
 """
     genai.configure(api_key="AIzaSyDeOUGM2GwTI-4JSp37dy76bf9l84QAig0")
-    model = genai.GenerativeModel("gemini-2.0-flash")
+    model = genai.GenerativeModel("gemini-2.0-flash-lite")
     response = model.generate_content(prompt)
     output = response.text
 
@@ -94,7 +96,7 @@ Output format:
 """
 
     genai.configure(api_key="AIzaSyDeOUGM2GwTI-4JSp37dy76bf9l84QAig0")
-    model = genai.GenerativeModel("gemini-2.0-flash")
+    model = genai.GenerativeModel("gemini-2.0-flash-lite")
     response = model.generate_content(prompt)
     output = response.text
     
@@ -250,7 +252,8 @@ if st.session_state.is_crawling:
                 "summary": gemini_output.get("summary", None),
                 "category": gemini_output.get("category", None),
                 "sentiment": gemini_output.get("sentiment", None),
-                "recommendation": gemini_output.get("recommendation", None)
+                "recommendation": gemini_output.get("recommendation", None),
+                "buzzer_influence_score": gemini_output.get("buzzer_influence_score", None)
             }
             results.append(result)
         except Exception as e:
@@ -283,13 +286,14 @@ if st.session_state.is_crawling:
         with st.spinner("🔍 Menganalisis artikel..."):
             full_context = "\n\n".join(
                 f"Keyword: {row['keyword']}\n"
-                f"Judul: {row['title']}\n"
-                f"Tanggal: {row['publish_date']}\n"
-                f"Lokasi: {row['location']}\n"
-                f"Kategori: {row['category']}\n"
-                f"Sentimen: {row['sentiment']}\n"
-                f"Ringkasan: {row['summary']}\n"
-                f"Rekomendasi Awal: {row['recommendation']}"
+                f"Title: {row['title']}\n"
+                f"Date: {row['publish_date']}\n"
+                f"Location: {row['location']}\n"
+                f"Category: {row['category']}\n"
+                f"Sentiment: {row['sentiment']}\n"
+                f"Summary: {row['summary']}\n"
+                f"Recommendation: {row['recommendation']}"
+                f"Buzzer Influence Score: {row['buzzer_influence_score']}\n"
                 for _, row in st.session_state.results_df.iterrows()
             )
             gemini_response = gemini_report(full_context)
